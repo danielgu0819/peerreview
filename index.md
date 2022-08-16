@@ -37,7 +37,8 @@ This topic including 4 codes, it is also the running sequence, describing as fol
    |  3  |   PDF_DIR            |   E:/Ucalgary/internship-proj/rcode/pdf files, save pdf files              |
    |  4  |   CSV_DIR            |   E:/Ucalgary/internship-proj/rcode, run all codes                         |
    |  5  |   WORD_COUNT         |   10, means to neglect this word if frequency less 10                      |
-    
+         
+         
    
 2, **pe2.ipynb** (Python code)   
    Why use python here?   There are two reasons    
