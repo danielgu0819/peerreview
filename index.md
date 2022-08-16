@@ -10,7 +10,7 @@ It is a funny topic, using data science typical processing methods to reveal the
 1. Scraping data from web site   
 2. Analyzing pdf file for preprint papers and published papers  
    such as word cloud and sentiment analysis    
-![image](https://github.com/danielgu0819/peerreview/blob/master/images/wordcloud.jpg?raw=true) ![image](https://github.com/danielgu0819/peerreview/blob/master/images/sentiment.jpg?raw=true)
+![image](https://github.com/danielgu0819/peerreview/blob/master/images/wordcloud.jpg?raw=true)![image](https://github.com/danielgu0819/peerreview/blob/master/images/sentiment.jpg?raw=true)
 
 3. Building prediction model, find correlation among published status and factors 
 4. This project has 4 codes and some output files, using R and Python, detail code description could be found in "Code description.txt" and below  
