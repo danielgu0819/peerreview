@@ -12,6 +12,8 @@ It is a funny topic, using data science typical processing methods to reveal the
    such as word cloud and sentiment analysis    
 ![image](https://github.com/danielgu0819/peerreview/blob/master/images/wordcloud.jpg) ![image](https://github.com/danielgu0819/peerreview/blob/master/images/sentiment.jpg)   
 
+https://github.com/danielgu0819/peerreview/blob/master/images/sentiment.jpg?raw=true
+
 3. Building prediction model, find correlation among published status and factors 
 4. This project has 4 codes and some output files, using R and Python, detail code description could be found in "Code description.txt" and below  
 
