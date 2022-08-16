@@ -1,4 +1,4 @@
-# Peer Review Project
+# Paper's Peer Review 
 Quantifying the value of peer review for scientific publishing-202208
 
 It is a funny topic, the methodology is 
