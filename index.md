@@ -1,10 +1,11 @@
-## Welcome to GitHub Pages
+## Welcome to Peer Review Project
 
-You can use the [editor on GitHub](https://github.com/danielgu0819/peerreview/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
+It is a funny topic, using data science methods to reveal the value of peer review between original and published papers.
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+### Methodology 
 
-### Markdown
+Scraping data from web site analyzing pdf file for preprint papers and published papers building prediction model and find correlation among published status and factors This project has 4 codes and some output files, using R and Python. detail code description could be found in "Code description.txt"
+ 
 
 Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
 
