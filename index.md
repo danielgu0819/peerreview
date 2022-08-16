@@ -1,13 +1,22 @@
 ## Welcome to Peer Review Project
 
-It is a funny topic, using data science methods to reveal the value of peer review between original and published papers.
+It is a funny topic, using data science typical processing methods to reveal the value of peer review between original and published papers.
+  _figure 1 data analysis flow_ 
+  
+![image](https://github.com/danielgu0819/peerreview/blob/master/images/dataprocess.jpg)
 
 ## Methodology 
 
-1. Scraping data from web site 
-2. Analyzing pdf file for preprint papers and published papers 
+1. Scraping data from web site   
+2. Analyzing pdf file for preprint papers and published papers  
+   such as word cloud and sentiment analysis    
+![image](https://github.com/danielgu0819/peerreview/blob/master/images/wordcloud.jpg) ![image](https://github.com/danielgu0819/peerreview/blob/master/images/sentiment.jpg)   
+
 3. Building prediction model, find correlation among published status and factors 
-4. This project has 4 codes and some output files, using R and Python, detail code description could be found in "Code description.txt"
+4. This project has 4 codes and some output files, using R and Python, detail code description could be found in "Code description.txt" and below  
+
+
+
 
 ## Codes description 
 
@@ -21,13 +30,13 @@ This topic including 4 codes, it is also the running sequence, describing as fol
 
    - This code's parameters(could be found in code)   
 
-   | Seq |   Parameters         |   Description                                                 |
-   |-----|:--------------------:| -------------------------------------------------------------:|
-   |  1  |   initial pages link |   https://www.biorxiv.org/search/quan%252Blong%252Bcanada     |
-   |  2  |   NumPage            |   20, means  to scrap data from 20 web pages                  |
-   |  3  |   PDF_DIR            |   E:/Ucalgary/internship-proj/rcode/pdf files, save pdf files |
-   |  4  |   CSV_DIR            |   E:/Ucalgary/internship-proj/rcode, run all codes            |
-   |  5  |   WORD_COUNT         |   10, means to neglect this word if frequency less 10         |
+   | Seq |   Parameters         |   Description                                                              |
+   |-----|:--------------------:| --------------------------------------------------------------------------:|
+   |  1  |   initial pages link |   https://www.biorxiv.org/search/quan%252Blong%252Bcanada                  |
+   |  2  |   NumPage            |   20, means  to scrap data from 20 web pages                               |
+   |  3  |   PDF_DIR            |   E:/Ucalgary/internship-proj/rcode/pdf files, save pdf files              |
+   |  4  |   CSV_DIR            |   E:/Ucalgary/internship-proj/rcode, run all codes                         |
+   |  5  |   WORD_COUNT         |   10, means to neglect this word if frequency less 10                      |
     
    
 2, **pe2.ipynb** (Python code)   
@@ -63,10 +72,10 @@ This topic including 4 codes, it is also the running sequence, describing as fol
     
     
 ## Support or Contact   
-Instructor: Associate Professor  Dr. Quan Long   
+* Instructor: Associate Professor  Dr. Quan Long   
 Department of Biochemistry and Molecular Biology, University of Calgary
 
-Author: Huaien Gu   
+* Author: Huaien Gu   
 Data Science MSc Program, University of Calgary 
 danielgu0819@gmail.com 
 
