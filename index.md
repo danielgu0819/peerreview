@@ -10,7 +10,7 @@ It is a funny topic, using data science typical processing methods to reveal the
 1. Scraping data from web site   
 2. Analyzing pdf file for preprint papers and published papers  
    such as word cloud and sentiment analysis    
-![image](https://github.com/danielgu0819/peerreview/blob/master/images/wordcloud.jpg) ![image](https://github.com/danielgu0819/peerreview/blob/master/images/sentiment.jpg)   
+![image](https://github.com/danielgu0819/peerreview/blob/master/images/wordcloud.jpg?raw=true) ![image](https://github.com/danielgu0819/peerreview/blob/master/images/sentiment.jpg)   
 
 ![image](https://github.com/danielgu0819/peerreview/blob/master/images/sentiment.jpg?raw=true)
 
