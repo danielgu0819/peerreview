@@ -1,0 +1,287 @@
+---
+title: "biorxiv"
+author: "DanielGu"
+date: "2022-06"
+output: html_document 
+---
+
+# this code including two parts
+# 1) read data from website, assume the initial website url is a link 
+#    after input "quan long canada" in https://www.biorxiv.org, we got the url
+#    "https://www.biorxiv.org/search/quan%252Blong%252Bcanada" 
+#
+# 2) download preprint articles' pdf files  and analyze them, to get basice information
+#    such as, words number, pages number, image number, author lists, top 10 words, etc.
+# 
+# the output is file biorxiv-pdf.csv 
+
+
+# public libraries and parameters
+```{r  echo=FALSE,warning=FALSE}
+# libs
+library("rvest")
+library('stringr') 
+library("RSelenium")
+#library("tidyverse") 
+library("js")
+
+
+library(downloader)
+library(pdftools)
+library(hexView)
+library(stringr)
+#for package metagear installation
+  # install.packages("BiocManager")  
+  # BiocManager::install("EBImage")
+library(metagear)
+library(jiebaRD)
+library(jiebaR)
+library(wordcloud2)
+library(htmlwidgets)
+
+######### parameters ---------------------------------------------------------
+
+## this parameter means, how many pages this script will process from given url
+NumPage = 20
+## homepage for website biorxiv
+HomePage = "https://www.biorxiv.org"
+ 
+## directory for downloading pdf files 
+PDF_DIR = "E:/Ucalgary/internship-proj/rcode/pdf files" 
+
+## directory for csv  files 
+CSV_DIR = "E:/Ucalgary/internship-proj/rcode"
+
+## one word's number, such as, 30 means the word in the pdf file has 30 times 
+WORD_COUNT = 10
+
+```
+ 
+# function for words counting 
+```{r setup, include=FALSE}
+# count word number, excluding some simple words and digital
+pdf.wordstat <- function(file){
+  
+  
+  text <- pdf_text(file)
+  seg  <- tolower(qseg[text])
+  seg  <- sort(seg,decreasing = TRUE)
+  seg  <- table(seg)
+  
+ #delete some simple words
+  ex <- c("is", "are", "be", "was", "were", "become", "becomes", "do", "did", "does", "a", "an", "the", "can", "will", "would", "could", "should", "may", "might", "have", "has", "and", "or", "not", "but", "although", "though", "no", "also", "if", "against", "any", "for", "on", "off", "from", "to", "of", "in", "by", "like", "as", "at", "about", "up", "down", "below", "between", "above", "with", "many", "more", "much", "most", "better", "worse", "worst", "best", "good", "bad", "it", "them", "its", "their", "we", "you", "our", "this", "that", "these", "those", "what", "when", "where", "how", "which", "whose", "why", "get", "some", "other","others","a","b","c","c","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z","biorxiv","doi","preprint")
+ seg[ex] <- -1 
+ 
+ # delete all word has digital, which is not true word
+ for (i in 1:length(seg)){
+   str <- names(seg)[i]
+   n   <- nchar(str)
+   for(j in 1:n){
+     ch <- substr(str,j,j)
+     if(ch >="0" && ch <="9"){
+       seg[i] <- -1
+     }
+   }
+ }
+ 
+ seg <- seg[seg > WORD_COUNT]
+ 
+ return(seg) 
+  
+}
+
+```
+
+
+
+# scraping basic information from website 
+# for 20 pages website, it will take 8 minutes 
+```{r  warning=FALSE ,echo = FALSE}  
+
+# step1 construct all pages' url  
+url    <- c(1:NumPage)
+# this url is the default url for this website
+#url[1] <- "https://www.biorxiv.org/content/early/recent"
+
+# input "quan long canada" in https://www.biorxiv.org, we got the following url
+url[1] <- "https://www.biorxiv.org/search/quan%252Blong%252Bcanada"
+t_str  <- "?page="
+
+for (i in 2:NumPage){
+  url[i] <- paste(url[1],t_str,i-1,sep="") 
+}
+  
+# step2 analysis website information 
+start_time <- Sys.time()
+
+title  <- data.frame()
+link   <- data.frame()
+author <- data.frame()  
+author_num <- data.frame()  
+
+cat("step2 processing ... \n")
+for (i in 1:NumPage){
+  # get all papers' title 
+  web       <- read_html(url[i]) 
+  content   <- web %>% html_nodes(xpath = '//li//div//a//span[@class = "highwire-cite-title"]')
+  tmp_title <- data.frame(title = content %>% html_text() )
+  title     <- rbind(title,tmp_title)  
+  
+  # get all papers' link
+  content2   <- web %>% html_nodes(xpath = '//li//div//a[@class = "highwire-cite-linked-title"]')
+  tmp_link   <- data.frame(link = content2 %>% html_attr("href"))
+  for (j in 1:length(tmp_link$link)){
+    tmp_link$link[j]   <- paste(HomePage,tmp_link$link[j],sep="")
+  }
+  link       <- rbind(link,tmp_link)    
+  
+  # get all papers' authors
+  content3    <- web %>% html_nodes(xpath = '//li//div[@class = "highwire-cite-authors"]  ')
+  tmp_author     <- c(1:length(content3)) 
+  for (j in 1:length(content3)){
+    given_name    <-  (givenname =  content3[j]%>%html_nodes("span.nlm-given-names")%>%html_text())
+    sur_name      <-  (surname   = content3[j]%>%html_nodes("span.nlm-surname")%>%html_text()) 
+    temp <- paste(given_name ,sur_name ,sep=" ")   
+    tmp_author[j]  <- toString(temp)  
+  } 
+  author1  <- data.frame(author = tmp_author)
+  author   <- rbind(author,author1)   
+} 
+author_num <- str_count(author$author[],",")+1
+ 
+
+end_time <- Sys.time()
+cat("step2 time used",end_time - start_time)
+
+# step3 analysis each paper's information 
+
+abstract      <- data.frame()
+tmp_abstract  <- c(1:length(link$link)) 
+pre_doi       <- data.frame()
+tmp_pre_doi   <- c(1:length(link$link))
+pre_pdf_link  <- data.frame()
+tmp_pre_pdf_link   <- c(1:length(link$link))
+
+start_time <- Sys.time()
+for (i in 1:length(link$link)){
+
+if (i%%10 == 0){
+  end_time <- Sys.time()
+  cat("\nstep3 in progress... till now time used",end_time - start_time,"processed total links",i)
+  start_time <- Sys.time()}
+  
+#1 obtain abstract( 100 words)
+  web             <- read_html(link$link[i]) 
+  content         <- web %>% html_nodes(xpath = '//meta[@name = "DC.Description"]')   
+  tmp_abstract[i] <-  substr(content %>% html_attr("content"),1,100)  
+  
+#2 obtain pre-doi
+  web        <- read_html(link$link[i])
+  content2   <- web %>% html_nodes(xpath = '//div[@class = "highwire-cite-metadata"]//span [@class = "highwire-cite-metadata-doi highwire-cite-metadata"] ')
+  tmp <- content2[1] %>% html_text()
+  tmp_pre_doi[i] <- substr(tmp,6,str_length(tmp))
+
+  
+#3 obtain pre_pdf_link
+  web        <- read_html(link$link[i])
+  content3   <- web %>% html_nodes(xpath = '//div[@class = "panel-pane pane-highwire-variant-link"]//div[@class = "pane-content"]//a  ')
+  tmp <- content3[1] %>% html_attr("href")
+  tmp_pre_pdf_link[i] <- paste( HomePage,sep="",tmp)  
+    
+}
+abstract      <- data.frame(abstract = tmp_abstract) 
+pre_doi       <- data.frame(pre_doi  = tmp_pre_doi)
+pre_pdf_link  <- data.frame(pre_pdf_link  = tmp_pre_pdf_link)
+ 
+cat("\nstep3 finished! " )
+
+# # save to file  
+biorxiv = data.frame(title = title,link = link ,abstract = abstract, pre_author = author,pre_author_num = author_num,  pre_doi = pre_doi,pre_pdf_link = pre_pdf_link)
+write.csv(biorxiv,file="biorxiv.csv" )
+  
+
+```
+
+
+# download and analyze preprint articles' pdf files
+```{r pressure, echo=FALSE}   
+
+#step 1:  download pre print pdf files
+rd <- biorxiv 
+head(rd[1:5])
+
+ 
+for (i in 1:length(rd$pre_pdf_link)) {
+
+  download.file(rd$pre_pdf_link[i],paste(PDF_DIR,sep="","/",i,".pdf"),mode="wb")
+  if (i%%10 == 0){
+    cat("\nstep1 in progress... total files",length(rd$pre_pdf_link),"  downloaded : ", i)
+  }
+
+}
+
+#step 2: analyze information from pdf files
+pre_images_num <- c(1:length(rd$pre_pdf_link))
+pre_images_num <- 0
+pre_words_num  <- c(1:length(rd$pre_pdf_link))
+pre_words_num  <- 0
+pre_pages_num  <- c(1:length(rd$pre_pdf_link))
+pre_pages_num  <- 0
+pre_top_words  <- data.frame() 
+
+ 
+setwd(PDF_DIR)
+ 
+for (i in 1:length(rd$pre_pdf_link)) {
+  
+
+  filename <- paste(PDF_DIR,"/",i,sep="",".pdf")
+  
+# get pdf images number, if no images or files error, continue 
+  try(
+    { pre_images_num[i] <- length(PDF_extractImages(filename))  }
+    , silent =TRUE
+  )
+  
+ 
+# get pdf page number
+  pre_pages_num[i] <- pdf_length(filename)
+
+  
+# get pdf words number
+  pre_words_num[i] <-  sum(str_count(pdf_text(filename)[]))
+  
+# wordcloud2 show pdf file's word counting 
+  try(
+    {res <- pdf.wordstat(filename)}
+    ,silent = TRUE
+  )
+  
+# output each file's wordcloud picture  
+# wc <- wordcloud2(res,size=1,shape="circle",color="random-light")
+# saveWidget(wc,paste(i,sep="","-biorxiv-pdf-wordcloud.html"),selfcontained = F )
+# webshot::webshot(paste(i,sep="","-biorxiv-pdf-wordcloud.html"),paste(i,sep="","-biorxiv-pdf-wordcloud."),vwidth = 1992, vheight = 1744, delay =10)
+ 
+ #save top 10 words to csv file
+ tmp_top_words <- data.frame(top_words =   
+                               toString(names(sort(res[],decreasing=TRUE)[1:10])) ) 
+ pre_top_words <- rbind(pre_top_words,tmp_top_words)
+ 
+ 
+if (i%%5 == 0){ 
+  cat("\nstep2 in progress...total files ",length(rd$pre_pdf_link)," processed total files",i)}
+  
+}
+cat("\nstep2 finshed, processed  ",i," files")
+
+#step 3:  save to file 
+getwd() 
+pdf_dataframe = data.frame(pre_images_num = pre_images_num, pre_words_num = pre_words_num,
+                           pre_pages_num = pre_pages_num,pre_top_words = pre_top_words)
+write.csv(cbind(rd,pdf_dataframe),file="biorxiv-pdf.csv" )
+ 
+
+``` 
+
+
+

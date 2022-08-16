@@ -1,0 +1,115 @@
+---
+title: "biorxiv-sentiment"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(data.table) 
+library('syuzhet')
+library(pdftools)
+
+######### parameters ---------------------------------------------------------
+## directory for csv  files 
+CSV_DIR = "E:/Ucalgary/internship-proj/rcode"
+ 
+## directory for preprint pdf files 
+PDF_DIR = "E:/Ucalgary/internship-proj/rcode/pdf files"
+
+
+
+```
+ 
+
+
+```{r} 
+setwd(CSV_DIR)
+rd  <- read.csv("biorxiv-pdf3.csv") 
+rd2 <- rd[-1] 
+ 
+arr_sent      <- array(c(0),dim=c(10,3))
+tmp_arr_sent  <- array(c(0),dim=c(10,3))
+
+# output sentiment graph for preprint
+pdf("biorxiv-senti-pic.pdf",width=3,height=3)
+
+# sentiment analysis 
+for (i in 1:max(rd["seq"])) { 
+  
+  reviews <- pdf_text(paste(PDF_DIR,sep="","/",i,".pdf")) 
+  
+  #nrc analysis
+  nrc     <-  get_nrc_sentiment(reviews)
+  #get sums of all documents
+  nrc_sum <-  colSums(nrc) 
+  #names(nrc_sum) 
+  barplot(nrc_sum,las=2,main= paste( i,".pdf"," sentiment analysis"))
+   
+  tmp_arr_sent[,1] <- i
+  tmp_arr_sent[,2] <- names(sort(nrc_sum))
+  tmp_arr_sent[,3] <- sort(nrc_sum)[]
+    
+  if(i==1){
+    arr_sent <- tmp_arr_sent
+  }else{
+    arr_sent <- rbind(arr_sent,tmp_arr_sent)
+  }
+  
+  
+  if (i%%10 == 0){ 
+    cat("\nstep1 in progress... total files",max(rd["seq"]),"  processed : ", i)
+  } 
+  
+  write.csv(arr_sent, "biorxiv-senti-data.csv")
+  
+}
+
+# output sentiment graph
+dev.off()
+
+
+arr_sent      <- array(c(0),dim=c(10,3))
+tmp_arr_sent  <- array(c(0),dim=c(10,3))
+
+# output sentiment graph for published
+pdf("biorxiv-senti-pic2.pdf",width=3,height=3)
+
+for (i in 1:filenumbers) {
+  
+  if (rd$published[i] == 0) { 
+    next
+  }
+  
+  reviews <- pdf_text(paste(PDF_DIR,sep="","/p",i,".pdf")) 
+  
+  #nrc analysis
+  nrc     <-  get_nrc_sentiment(reviews)
+  #get sums of all documents
+  nrc_sum <-  colSums(nrc) 
+  #names(nrc_sum) 
+  barplot(nrc_sum,las=2,main= paste( "p",sep="",i,".pdf"," sentiment analysis"))
+   
+  tmp_arr_sent[,1] <- i
+  tmp_arr_sent[,2] <- names(sort(nrc_sum))
+  tmp_arr_sent[,3] <- sort(nrc_sum)[]
+    
+  if(i==1){
+    arr_sent <- tmp_arr_sent
+  }else{
+    arr_sent <- rbind(arr_sent,tmp_arr_sent)
+  }
+  
+  
+  if (i%%10 == 0){ 
+    cat("\nstep1 in progress... total files",max(rd["seq"]),"  processed : ", i)
+  } 
+  
+  write.csv(arr_sent, "biorxiv-senti-data2.csv")
+  
+}
+
+# output sentiment graph
+dev.off()
+
+```

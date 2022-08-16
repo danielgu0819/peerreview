@@ -1,0 +1,60 @@
+This topic including 4 codes, it is also the running sequence, describing as following 
+
+1, biorxiv.Rmd (R code)
+   This code's functions
+   1) to scrap preprint papers from https://www.biorxiv.org 
+   2) to download all preprint pdf files
+   3) to save information to biorxiv.csv(basic information) and biorxiv-pdf.csv(basic information + pdf analysis information)
+
+   This code's parameters(could be found in code)
+   0) the initial pages link is https://www.biorxiv.org/search/quan%252Blong%252Bcanada
+      when you input "quan long canada" in https://www.biorxiv.org, you will get it
+   1) NumPage = 20 
+      to scrap data from 20 web pages
+   2) PDF_DIR = "E:/Ucalgary/internship-proj/rcode/pdf files" 
+      to save preprint pdf file into this directory
+   3) CSV_DIR = "E:/Ucalgary/internship-proj/rcode"
+      code running directory
+   4) WORD_COUNT = 10
+      to count word frequency in pdf file, if the frequency less than this parameter, neglect this word
+   
+2, pe2.ipynb (Python code)
+   Why use python here?    There are two reasons
+   1) Because the web site https://www.biorxiv.org has pesudo element for published papers link 
+      (some preprint papers have already been published) , using R is difficult to crawl data, but python is very easy.
+   2) After obtaining the published files' link, we can not download paper directly, because the published web sites are 
+      various, and many of them need to pay or sign in before download.
+      So under instructor's advice, we could download this files from library of university of calgary.
+      Python could simulate operating browser to find and download files.
+   
+   But, this code can not be run smoothly, not only because the library web site is not stable, but also because 
+   the code offten meeting exception. So, in fact, I run it together with adjusting it mannuly. 
+   You could optimize it:) or you could integrate all of four codes in one python file. 
+   
+
+   The code's core parts are
+   1) to use selenium for pseudo element extraction 
+   2) to use firefox browser and my username/password login library url 
+   3) to find the each pdf file's link and download
+   4) output files is biorxiv-pdf2.csv 
+
+   
+3, biorxiv3.Rmd (R code)
+   There are two functions 
+   1) to analyze published pdf files, the methods similar like biorxiv.Rmd
+   2) to build knn prediction model and correlation analysis
+   3) output file biorxiv-pdf3.csv 
+
+
+4, biorxiv-senti.Rmd 
+   This code is independent code, get sentiment data for preprint pdf files and published pdf files.
+   output are
+   1) biorxiv-senti-data.csv, biorxiv-senti-data.pdf  for preprint  pdf files
+   2) biorxiv-senti-data2.csv biorxiv-senti-data2.pdf for published pdf files
+
+
+
+
+
+
+   

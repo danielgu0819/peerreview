@@ -1,0 +1,232 @@
+---
+title: "biorxiv3"
+author: "DanielGu"
+date: '2022-08-04'
+output: html_document
+---
+
+```{r  echo=FALSE,warning=FALSE}
+library(dplyr)
+library(pdftools)
+library(hexView)
+library(stringr)
+#for package metagear installation
+  # install.packages("BiocManager")  
+  # BiocManager::install("EBImage")
+library(metagear)
+library(jiebaRD)
+library(jiebaR)
+library(wordcloud2)
+library(htmlwidgets)
+library(class) 
+######### parameters ---------------------------------------------------------
+
+## directory for downloading pdf files 
+PDF_DIR = "E:/Ucalgary/internship-proj/rcode/pdf files" 
+
+## one word's number, such as, 30 means the word in the pdf file has 30 times 
+WORD_COUNT = 10
+
+
+```
+
+# same funciton with biorxiv.rmd,just copy here 
+# function for words counting 
+```{r setup, include=FALSE}
+# count word number, excluding some simple words and digital
+pdf.wordstat <- function(file){
+  
+  
+  text <- pdf_text(file)
+  seg  <- tolower(qseg[text])
+  seg  <- sort(seg,decreasing = TRUE)
+  seg  <- table(seg)
+  
+ #delete some simple words
+  ex <- c("is", "are", "be", "was", "were", "become", "becomes", "do", "did", "does", "a", "an", "the", "can", "will", "would", "could", "should", "may", "might", "have", "has", "and", "or", "not", "but", "although", "though", "no", "also", "if", "against", "any", "for", "on", "off", "from", "to", "of", "in", "by", "like", "as", "at", "about", "up", "down", "below", "between", "above", "with", "many", "more", "much", "most", "better", "worse", "worst", "best", "good", "bad", "it", "them", "its", "their", "we", "you", "our", "this", "that", "these", "those", "what", "when", "where", "how", "which", "whose", "why", "get", "some", "other","others","a","b","c","c","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z","biorxiv","doi","preprint")
+ seg[ex] <- -1 
+ 
+ # delete all word has digital, which is not true word
+ for (i in 1:length(seg)){
+   str <- names(seg)[i]
+   n   <- nchar(str)
+   for(j in 1:n){
+     ch <- substr(str,j,j)
+     if(ch >="0" && ch <="9"){
+       seg[i] <- -1
+     }
+   }
+ }
+ 
+ seg <- seg[seg > WORD_COUNT]
+ 
+ return(seg) 
+  
+}
+
+```
+ 
+# read biorxiv-pdf2.csv and analyze all published files
+# output is biorxiv-pdf3.csv 
+# almost analyzing methods same with biorxiv.rmd
+```{r pressure, echo=FALSE}   
+
+#step 1:  read biorxiv-pdf2.csv 
+rd <- read.csv("biorxiv-pdf2.csv")  
+names(rd)[names(rd)=="X"]="seq"
+rd <- select(rd,-2)
+head(rd[1:5])
+
+filenumbers = length(rd$seq)
+ 
+ 
+
+#step 2: analyze information from pdf files
+pub_images_num <- c(1:length(rd$pub_pdf_link))
+pub_images_num <- 0
+pub_words_num  <- c(1:length(rd$pub_pdf_link))
+pub_words_num  <- 0
+pub_pages_num  <- c(1:length(rd$pub_pdf_link))
+pub_pages_num  <- 0
+pub_top_words  <- data.frame() 
+
+ 
+setwd(PDF_DIR)
+
+ 
+for (i in 1:filenumbers) {
+  
+  if (rd$published[i] == 0) {
+    tmp_top_words <- data.frame(pub_top_words = "" ) 
+    pub_top_words <- rbind(pub_top_words,tmp_top_words)
+    next
+  }
+  
+  
+  filename <- paste(PDF_DIR,"/p",i,sep="",".pdf")
+  
+# get pdf images number, if no images or files error, continue 
+  try(
+    { pub_images_num[i] <- length(PDF_extractImages(filename))  }
+    , silent =TRUE
+  )
+  
+ 
+# get pdf page number
+  pub_pages_num[i] <- pdf_length(filename)
+
+  
+# get pdf words number
+  pub_words_num[i] <-  sum(str_count(pdf_text(filename)[]))
+  
+# wordcloud2 show pdf file's word counting 
+  try(
+    { res <- pdf.wordstat(filename) }
+    ,silent = TRUE
+  )
+  
+# output each file's wordcloud picture  
+# wc <- wordcloud2(res,size=1,shape="circle",color="random-light")
+# saveWidget(wc,paste(i,sep="","-biorxiv-pdf-wordcloud.html"),selfcontained = F )
+# webshot::webshot(paste(i,sep="","-biorxiv-pdf-wordcloud.html"),paste(i,sep="","-biorxiv-pdf-wordcloud."),vwidth = 1992, vheight = 1744, delay =10)
+ 
+ #save top 10 words to csv file
+ tmp_top_words <- data.frame(pub_top_words =   
+                               toString(names(sort(res[],decreasing=TRUE)[1:10])) ) 
+ pub_top_words <- rbind(pub_top_words,tmp_top_words)
+ 
+ 
+if (i%%5 == 0){ 
+  cat("\nstep2 in progress...total files.. ",
+      sum(rd$published[])," processed    ",sum(rd$published[1:i]))}
+  
+}
+cat("\nstep2 finshed  " )
+
+#step 3:  save to file 
+setwd("../")
+pdf_dataframe = data.frame(pub_images_num = pub_images_num, pub_words_num = pub_words_num,
+                           pub_pages_num = pub_pages_num,pub_top_words = pub_top_words)
+write.csv(cbind(rd,pdf_dataframe),file="biorxiv-pdf3.csv" )
+ 
+
+``` 
+# building model for pre print and published files relationship 
+```{r pressure, echo=FALSE}   
+
+rd <- read.csv("biorxiv-pdf3.csv")   
+rdata <- rd
+#rdata = na.omit(rdata)
+
+
+
+# step1 testing regression model
+#1) using all data, to find is there relationship among published flag and some preprint pdf factors
+p_model = lm( (rdata$published) ~ rdata$pre_author_num + rdata$pre_images_num +
+                               rdata$pre_pages_num + rdata$pre_words_num)
+summary(p_model)
+
+#2) using all data, to find is there relationship among published flag and some published pdf factors
+p_model = lm(rdata$published ~ rdata$pub_images_num +
+                               rdata$pub_pages_num + rdata$pub_words_num)
+summary(p_model)
+
+#3) using published(==1) data, to find is there relationship among published flag and some preprint pdf factors
+rdata = filter(rdata, published == 1)
+p_model = lm(rdata$published ~ rdata$pre_author_num + rdata$pre_images_num +
+                               rdata$pre_pages_num + rdata$pre_words_num)
+summary(p_model)
+
+
+# use published data(published==1) and pre print data(published==0)  
+rdata <- rd 
+
+rdata_pub = filter(rdata, published == 1)
+rdata2     = data.frame(published = rdata_pub$published, imagesnum = rdata_pub$pub_images_num,
+                       pagesnum  = rdata_pub$pub_pages_num, wordsnum = rdata_pub$pub_words_num)
+rdata_pre = filter(rdata, published == 0)
+rdata3    = data.frame(published = rdata_pre$published, imagesnum = rdata_pre$pre_images_num,
+                       pagesnum  = rdata_pre$pre_pages_num, wordsnum = rdata_pre$pre_words_num)
+rdata4    = rbind(rdata2,rdata3)
+rdata5 = na.omit(rdata4)
+p_model = lm(rdata5$published ~ rdata5$imagesnum + rdata5$pagesnum + rdata5$wordsnum)
+summary(p_model)
+
+# check correlation ,pagesnum  has little higher correlation  
+cor(rdata5,method =  "spearman")
+
+#4) use preprint and published articles data
+# set published==0 if use preprint pdfs' data
+rdata <- rd
+rdata_pub = filter(rdata, published == 1)
+rdata2     = data.frame(published = rdata_pub$published, imagesnum = rdata_pub$pub_images_num,
+                       pagesnum  = rdata_pub$pub_pages_num, wordsnum = rdata_pub$pub_words_num) 
+rdata3    = data.frame(published = 0, imagesnum = rdata_pub$pre_images_num,
+                       pagesnum  = rdata_pub$pre_pages_num, wordsnum = rdata_pub$pre_words_num)
+rdata4    = rbind(rdata2,rdata3)
+rdata5 = na.omit(rdata4)
+p_model = lm(rdata5$published ~ rdata5$imagesnum + rdata5$pagesnum + rdata5$wordsnum)
+summary(p_model)
+
+# check correlation ,pagesnum  has little higher correlation  
+cor(rdata5,method =  "spearman")
+
+# step2 testing classification model
+na.omit(rdata5)
+train_index = sample(1:length(rdata5$published),round(length(rdata5$published)*0.6))
+train_set = rdata5[train_index,]
+test_set  = rdata5[-train_index,]
+train_out = train_set$published
+test_out  = test_set$published
+scale(train_set)
+scale(test_set)
+knn_pred=knn (train_set,test_set,train_out ,k=1)
+knn_pred
+mean(knn_pred == test_out)
+
+```
+
+
+
+
+
