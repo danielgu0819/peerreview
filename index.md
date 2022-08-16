@@ -13,7 +13,7 @@ It is a funny topic, using data science methods to reveal the value of peer revi
 
 This topic including 4 codes, it is also the running sequence, describing as following 
 
-1, biorxiv.Rmd (R code)
+1, **biorxiv.Rmd** (R code)
    This code's functions
    1) to scrap preprint papers from https://www.biorxiv.org 
    2) to download all preprint pdf files
@@ -31,11 +31,11 @@ This topic including 4 codes, it is also the running sequence, describing as fol
    4) WORD_COUNT = 10
       to count word frequency in pdf file, if the frequency less than this parameter, neglect this word
    
-2, pe2.ipynb (Python code)
+2, **pe2.ipynb** (Python code)
    Why use python here?    There are two reasons
-   1) Because the web site https://www.biorxiv.org has pesudo element for published papers link 
+   . Because the web site https://www.biorxiv.org has pesudo element for published papers link 
       (some preprint papers have already been published) , using R is difficult to crawl data, but python is very easy.
-   2) After obtaining the published files' link, we can not download paper directly, because the published web sites are 
+   . After obtaining the published files' link, we can not download paper directly, because the published web sites are 
       various, and many of them need to pay or sign in before download.
       So under instructor's advice, we could download this files from library of university of calgary.
       Python could simulate operating browser to find and download files.
@@ -46,24 +46,24 @@ This topic including 4 codes, it is also the running sequence, describing as fol
    
 
    The code's core parts are
-   1) to use selenium for pseudo element extraction 
-   2) to use firefox browser and my username/password login library url 
-   3) to find the each pdf file's link and download
-   4) output files is biorxiv-pdf2.csv 
+   . to use selenium for pseudo element extraction 
+   . to use firefox browser and my username/password login library url 
+   . to find the each pdf file's link and download
+   . output files is biorxiv-pdf2.csv 
 
    
-3, biorxiv3.Rmd (R code)
+3, **biorxiv3.Rmd** (R code)
    There are two functions 
-   1) to analyze published pdf files, the methods similar like biorxiv.Rmd
-   2) to build knn prediction model and correlation analysis
-   3) output file biorxiv-pdf3.csv 
+   . to analyze published pdf files, the methods similar like biorxiv.Rmd
+   . to build knn prediction model and correlation analysis
+   . output file biorxiv-pdf3.csv 
 
 
-4, biorxiv-senti.Rmd 
+4, **biorxiv-senti.Rmd** 
    This code is independent code, get sentiment data for preprint pdf files and published pdf files.
    output are
-   1) biorxiv-senti-data.csv, biorxiv-senti-data.pdf  for preprint  pdf files
-   2) biorxiv-senti-data2.csv biorxiv-senti-data2.pdf for published pdf files
+   . biorxiv-senti-data.csv, biorxiv-senti-data.pdf  for preprint  pdf files
+   . biorxiv-senti-data2.csv biorxiv-senti-data2.pdf for published pdf files
  
 ### Support or Contact
 Instructor: Associate Professor  Dr. Quan Long
